@@ -1,15 +1,12 @@
 @extends('app')
 
-@section('title', 'My Customers')
+@section('title','WordPress Customers')
 
 @section('content')
 <main class="app-wrapper">
 <div class="container-fluid">
 
-{{-- ================= PANEL DATA ================= --}}
-<div class="app-page-head mb-3">
-  <h4 class="mb-0">My Customer Data</h4>
-</div>
+<h4 class="mb-3">Website Customer Data</h4>
 
 @if(session('success'))
 <div class="alert alert-success alert-dismissible fade show">
@@ -18,7 +15,7 @@
 </div>
 @endif
 
-<div class="card mb-4">
+<div class="card">
 <div class="card-body table-responsive">
 
 <table class="table table-hover align-middle">
@@ -35,7 +32,7 @@
 </thead>
 
 <tbody>
-@forelse($panelCustomers as $customer)
+@forelse($customers as $customer)
 <tr>
   <td>{{ $loop->iteration }}</td>
   <td>{{ $customer->name }}</td>
@@ -47,28 +44,27 @@
       {{ $customer->status }}
     </span>
   </td>
+
   <td class="text-end">
-    <a href="{{ url('/customers/edit/'.$customer->id) }}"
+    <a href="{{ route('wordpress.customers.edit',$customer->id) }}"
        class="btn btn-sm btn-warning">
-       Edit
+      Edit
     </a>
 
     <form method="POST"
-          action="{{ url('/customers/delete/'.$customer->id) }}"
+          action="{{ route('wordpress.customers.delete',$customer->id) }}"
           class="d-inline"
           onsubmit="return confirm('Delete this record?')">
       @csrf
       @method('DELETE')
-      <button class="btn btn-sm btn-danger">
-        Delete
-      </button>
+      <button class="btn btn-sm btn-danger">Delete</button>
     </form>
   </td>
 </tr>
 @empty
 <tr>
   <td colspan="7" class="text-center text-muted py-4">
-    No panel data found
+    No  data found
   </td>
 </tr>
 @endforelse
@@ -78,10 +74,9 @@
 </div>
 </div>
 
-
+<div class="mt-3">
+  {{ $customers->links('pagination::bootstrap-5') }}
 </div>
-</div>
-
 
 </div>
 </main>

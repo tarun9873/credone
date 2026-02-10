@@ -1,66 +1,120 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\CustomLoginController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\IpWhitelistController;
 use App\Http\Controllers\CustomerCreditCardController;
+
 /*
 |--------------------------------------------------------------------------
-| Web Routes
+| ROOT
 |--------------------------------------------------------------------------
 */
-
-// 🔹 ROOT → LOGIN
 Route::get('/', function () {
-    return redirect('/login');
+    return redirect()->route('login');
 });
 
-// 🔹 LOGIN PAGE
+
+/*
+|--------------------------------------------------------------------------
+| LOGIN / LOGOUT
+|--------------------------------------------------------------------------
+*/
 Route::get('/login', function () {
-    return view('auth.login'); // resources/views/auth/login.blade.php
+    return view('auth.login');
 })->name('login');
 
-// 🔹 LOGIN POST
 Route::post('/login', [CustomLoginController::class, 'login'])
     ->name('login.post');
 
-// 🔹 LOGOUT
 Route::post('/logout', function () {
     auth()->logout();
     request()->session()->invalidate();
     request()->session()->regenerateToken();
-    return redirect('/login');
+    return redirect()->route('login');
 })->name('logout');
 
-// 🔹 DASHBOARD (SAME FOR ALL ROLES)
+
+/*
+|--------------------------------------------------------------------------
+| AUTHENTICATED ROUTES
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
 
+    /*
+    |-------------------------
+    | DASHBOARD
+    |-------------------------
+    */
     Route::get('/dashboard', function () {
         return view('dashboard-index');
     })->name('dashboard');
 
-    // User create (Admin / Super Admin only)
-    Route::get('/users/create', [UserController::class, 'create']);
-    Route::post('/users/store', [UserController::class, 'store']);
 
-
-    // profile show
+    /*
+    |-------------------------
+    | PROFILE
+    |-------------------------
+    */
     Route::get('/profile', [ProfileController::class, 'edit'])
         ->name('profile.edit');
 
-    // profile update
     Route::post('/profile', [ProfileController::class, 'update'])
         ->name('profile.update');
 
 
+    /*
+    |-------------------------
+    | EMPLOYEES / USERS
+    |-------------------------
+    */
+    Route::get('/employees', [EmployeeController::class, 'index'])
+        ->name('employees.index');
+
+    Route::get('/employees/create', [UserController::class, 'create'])
+        ->name('employees.create');
+
+    Route::post('/employees/store', [UserController::class, 'store'])
+        ->name('employees.store');
+
+    Route::get('/employees/{id}', [EmployeeController::class, 'show'])
+        ->name('employees.show');
+
+    Route::delete('/employees/{id}', [EmployeeController::class, 'destroy'])
+        ->name('employees.destroy');
+
+/*
+|-------------------------
+| CUSTOMER EDIT / UPDATE
+|-------------------------
+*/
+Route::get(
+    '/customers/edit/{id}',
+    [CustomerCreditCardController::class, 'edit']
+)->name('customers.edit');
+
+Route::put(
+    '/customers/update/{id}',
+    [CustomerCreditCardController::class, 'update']
+)->name('customers.update');
+
+Route::delete(
+    '/customers/delete/{id}',
+    [CustomerCreditCardController::class, 'destroy']
+)->name('customers.delete');
+
+    /*
+    |-------------------------
+    | CUSTOMER CREDIT CARD FORM
+    |-------------------------
+    */
     Route::get('/costomers-data-new', function () {
         return view('costomers-new');
     })->name('costomers-new');
-
-
-
-
 
     Route::post(
         '/customer-credit-card/save',
@@ -68,22 +122,53 @@ Route::middleware('auth')->group(function () {
     )->name('customer.creditcard.save');
 
 
-    //   Route::get('/all-clientdata', function () {
-    //     return view('all-clientdata');
-    // })->name('clientdata');
+    /*
+    |-------------------------
+    | CUSTOMER LIST
+    |-------------------------
+    */
+    Route::get('/clientdata', [CustomerCreditCardController::class, 'index'])
+        ->name('customers.index');
 
-        Route::get('/clientdata', 
-        [CustomerCreditCardController::class, 'index']
-    )->name('customers.index');
+
+    /*
+    |-------------------------
+    | IP WHITELIST
+    |-------------------------
+    */
+    Route::get('/ip-whitelist', [IpWhitelistController::class, 'index'])
+        ->name('ip.whitelist');
+
+    Route::post('/ip-whitelist', [IpWhitelistController::class, 'store']);
+
+    Route::delete('/ip-whitelist/{id}', [IpWhitelistController::class, 'destroy']);
 
 
-    Route::post('/customers/status/{id}', [CustomerCreditCardController::class,'updateStatus']);
-Route::get('/customers/edit/{id}', [CustomerCreditCardController::class,'edit']);
-Route::delete('/customers/delete/{id}', [CustomerCreditCardController::class,'destroy']);
+
+    /*
+|-------------------------------------------------
+| WORDPRESS CUSTOMER DATA (ADMIN / SUPER ADMIN)
+|-------------------------------------------------
+*/
+Route::get(
+    '/wordpress/customers',
+    [CustomerCreditCardController::class, 'wordpressIndex']
+)->name('wordpress.customers.index');
+
+Route::get(
+    '/wordpress/customers/edit/{id}',
+    [CustomerCreditCardController::class, 'wordpressEdit']
+)->name('wordpress.customers.edit');
+
 Route::put(
-    '/customers/update/{id}',
-    [CustomerCreditCardController::class, 'update']
-)->name('customers.update');
+    '/wordpress/customers/update/{id}',
+    [CustomerCreditCardController::class, 'wordpressUpdate']
+)->name('wordpress.customers.update');
+
+Route::delete(
+    '/wordpress/customers/delete/{id}',
+    [CustomerCreditCardController::class, 'wordpressDestroy']
+)->name('wordpress.customers.delete');
 
 
-});
+}); // ✅ END auth middleware

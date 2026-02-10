@@ -3,7 +3,7 @@
 
       <div class="app-navbar-brand">
         <a class="navbar-brand-logo" href="index.html">
-          <img src="assets/images/logo.svg" alt="Credons Admin Dashboard Logo">
+          <img src="{{asset('assets/images/logo.svg')}}"Credons Admin Dashboard Logo">
         </a>
       </div>
       <div class="app-navbar-tabs" data-simplebar>
@@ -21,17 +21,17 @@
          
 
           <li class="nav-item mb-auto" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Add Customer">
-            <a href="javascript:void(0);" class="btn btn-icon btn-lg btn-white waves-effect waves-light" data-bs-toggle="modal" data-bs-target="#addCustomerModal">
+            <a href="{{route('costomers-new')}}" class="btn btn-icon btn-lg btn-white waves-effect waves-light">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path opacity="0.5" d="M2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12Z" stroke="var(--bs-primary)" stroke-width="2" />
                 <path d="M15 12H12M12 12H9M12 12V9M12 12V15" stroke="var(--bs-primary)" stroke-width="2" stroke-linecap="round" />
               </svg>
             </a>
           </li>
-         @guest
-<li class="nav-item mt-5" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Login">
-  <a class="menu-link" href="{{ route('login') }}">
-@endguest
+        
+<li class="nav-item mt-5" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Log out">
+  <a class="menu-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+
 
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path opacity="0.5" d="M9.00195 7C9.01406 4.82497 9.11051 3.64706 9.87889 2.87868C10.7576 2 12.1718 2 15.0002 2H16.0002C18.8286 2 20.2429 2 21.1215 2.87868C22.0002 3.75736 22.0002 5.17157 22.0002 8V16C22.0002 18.8284 22.0002 20.2426 21.1215 21.1213C20.2429 22 18.8286 22 16.0002 22H15.0002C12.1718 22 10.7576 22 9.87889 21.1213C9.11051 20.3529 9.01406 19.175 9.00195 17" stroke="var(--bs-heading-color)" stroke-width="2" stroke-linecap="round" />
@@ -43,7 +43,7 @@
       </div>
       <div class="app-tab-content">
         <div class="app-side-brands">
-          <a class="navbar-brand-text" href="index.html">Credons</a>
+          <a class="navbar-brand-text" href="index.html">CredOns</a>
         </div>
         <div class="app-content-inner">
           <div class="tab-content" id="appMenubarTabsContent">
@@ -54,7 +54,7 @@
                     <span class="menu-label">Dashboard</span>
                   </li>
                   <li class="menu-item">
-                    <a class="menu-link" href="index.html" role="button">
+                    <a class="menu-link" href="{{route('dashboard')}}" role="button">
                       <i class="fi fi-rr-house-blank"></i>
                       <span class="menu-label"> Dashboard</span>
                     </a>
@@ -62,23 +62,63 @@
                    <li class="menu-item">
                     <a class="menu-link" href="{{route('customers.index')}}" role="button">
                       <i class="fi fi-rr-user"></i>
-                      <span class="menu-label">All Client Data</span>
+                      <span class="menu-label">Show Customers Data</span>
                     </a>
                   </li>
                   <li class="menu-item">
                     <a class="menu-link" href="{{route('costomers-new')}}" role="button">
-                      <i class="fi fi-rr-user"></i>
-                      <span class="menu-label">Customers Data</span>
+                      <i class="fi fi-rr-settings"></i>
+                      <span class="menu-label">New Customers Data</span>
                     </a>
                   </li>
 
-                   <li class="menu-item">
-                    <a class="menu-link" href="employee.html" role="button">
-                      <i class="fi fi-rr-settings"></i>
-                      <span class="menu-label">Employees</span>
-                    </a>
-                  </li>
+                 @if(in_array(auth()->user()->role, ['admin','super_admin']))
+<li class="menu-item">
+  <a class="menu-link" href="{{ route('wordpress.customers.index') }}" role="button">
+    <i class="fi fi-rr-globe-alt"></i>
+    <span class="menu-label">Website  Data</span>
+  </a>
+</li>
+@endif
+
+
+                  {{-- Employees List (Admin + Super Admin only) --}}
+@if(in_array(auth()->user()->role, ['admin','super_admin']))
+<li class="menu-item">
+  <a class="menu-link" href="{{ route('employees.index') }}" role="button">
+    <i class="fi fi-rr-users"></i>
+    <span class="menu-label">Employees</span>
+  </a>
+</li>
+@endif
+
+
+{{-- Register Employee (Admin + Super Admin only) --}}
+@if(in_array(auth()->user()->role, ['admin','super_admin']))
+<li class="menu-item">
+  <a class="menu-link" href="{{ route('employees.create') }}" role="button">
+    <i class="fi fi-rr-user-add"></i>
+    <span class="menu-label">Register Employee</span>
+  </a>
+</li>
+@endif
+
                  
+                 
+                 
+             @auth
+  @if(in_array(auth()->user()->role, ['super_admin','admin']))
+    <li class="menu-item">
+      <a class="menu-link" href="{{ route('ip.whitelist') }}">
+        <i class="fi fi-rr-shield-check"></i>
+
+        <span class="menu-label">IP Whitelist</span>
+      </a>
+    </li>
+  @endif
+@endauth
+
+
                 
                 
                  

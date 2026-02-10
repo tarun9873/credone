@@ -28,6 +28,14 @@
       </div>
 
       <div class="card-body">
+                  {{-- Success Message --}}
+          @if(session('success'))
+            <div class="col-12 mt-3">
+              <div class="alert alert-success">
+                {{ session('success') }}
+              </div>
+            </div>
+          @endif
         <form class="row"
               method="POST"
               action="{{ route('customer.creditcard.save') }}">
@@ -39,7 +47,7 @@
             <input type="text"
                    name="name"
                    class="form-control"
-                   placeholder="Full Name"
+                   
                    required>
           </div>
 
@@ -56,8 +64,7 @@
             <label class="form-label">🪪 PAN Number</label>
             <input type="text"
                    name="pan_number"
-                   class="form-control"
-                   placeholder="ABCDE1234F">
+                   class="form-control">
           </div>
 
           {{-- Mother Name --}}
@@ -65,8 +72,7 @@
             <label class="form-label">🤱 Mother’s Name</label>
             <input type="text"
                    name="mother_name"
-                   class="form-control"
-                   placeholder="Mother Name">
+                   class="form-control">
           </div>
 
           {{-- Address --}}
@@ -74,8 +80,7 @@
             <label class="form-label">🏡 Residential Address</label>
             <input type="text"
                    name="resi_address"
-                   class="form-control"
-                   placeholder="House no, street, area">
+                   class="form-control">
           </div>
 
           {{-- Mobile --}}
@@ -83,8 +88,7 @@
             <label class="form-label">📞 Mobile Number</label>
             <input type="text"
                    name="mobile_number"
-                   class="form-control"
-                   placeholder="10 digit mobile">
+                   class="form-control">
           </div>
 
           {{-- Email --}}
@@ -92,8 +96,7 @@
             <label class="form-label">✉️ Email ID</label>
             <input type="email"
                    name="email"
-                   class="form-control"
-                   placeholder="example@email.com">
+                   class="form-control">
           </div>
 
           {{-- Company --}}
@@ -101,8 +104,7 @@
             <label class="form-label">🏭 Company Name</label>
             <input type="text"
                    name="company_name"
-                   class="form-control"
-                   placeholder="Company Name">
+                   class="form-control">
           </div>
 
           {{-- Designation --}}
@@ -110,8 +112,7 @@
             <label class="form-label">💼 Designation</label>
             <input type="text"
                    name="designation"
-                   class="form-control"
-                   placeholder="Designation">
+                   class="form-control">
           </div>
 
           {{-- Submit --}}
@@ -122,14 +123,7 @@
             </button>
           </div>
 
-          {{-- Success Message --}}
-          @if(session('success'))
-            <div class="col-12 mt-3">
-              <div class="alert alert-success">
-                {{ session('success') }}
-              </div>
-            </div>
-          @endif
+
 
         </form>
       </div>

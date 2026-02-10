@@ -49,7 +49,8 @@
 <small class="text-body d-block lh-sm">{{ auth()->user()->email }}</small>
               </div>
               <div class="avatar avatar-sm rounded-circle avatar-status-success">
-                <img src="assets/images/3135715.png" alt="">
+                <img src="{{ asset('assets/images/3135715.png') }}" alt="">
+
               </div>
             </a>
             <ul class="dropdown-menu dropdown-menu-end w-225px mt-1">

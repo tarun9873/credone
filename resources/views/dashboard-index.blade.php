@@ -23,6 +23,7 @@
 
    
 
+
     <div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModal" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -113,6 +114,11 @@
             </nav>
           </div>
         </div>
+
+
+
+
+
 
         <div class="row">
 

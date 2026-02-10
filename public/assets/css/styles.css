@@ -14791,11 +14791,11 @@ strong {
 }
 
 .breadcrumb-item + .breadcrumb-item::before {
-  content: "\f054";
-  font-family: "Font Awesome 6 Free";
+  content: '>';
+  /* font-family: "Font Awesome 6 Free";
   font-weight: 700;
   font-size: 11px;
-  line-height: 2;
+  line-height: 2; */
 }
 
 .auth-cover-wrapper .auth-cover {
@@ -20505,3 +20505,8 @@ span.flatpickr-weekday {
 }
 
 /*# sourceMappingURL=styles.css.map */
+.form-label {
+    margin-bottom: 4px;
+    color: #000;
+    font-weight: 600;
+}
