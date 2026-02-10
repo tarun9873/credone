@@ -68,12 +68,18 @@
           <td>{{ $ip->ip_address }}</td>
           <td>{{ $ip->label ?? '—' }}</td>
           <td>
-            <form method="POST" action="{{ url('/ip-whitelist/'.$ip->id) }}"
-                  onsubmit="return confirm('Remove this IP?')">
-              @csrf
-              @method('DELETE')
-              <button class="btn btn-sm btn-danger">Delete</button>
-            </form>
+<form method="POST"
+      action="{{ url('/ip-whitelist/'.$ip->id) }}"
+      class="d-inline"
+      onsubmit="return confirm('Delete this IP?')">
+  @csrf
+  @method('DELETE')
+
+  <button type="submit" class="btn btn-sm btn-danger">
+    Delete
+  </button>
+</form>
+
           </td>
         </tr>
       @endforeach
