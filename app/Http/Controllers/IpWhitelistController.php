@@ -61,7 +61,7 @@ class IpWhitelistController extends Controller
      */
     public function destroy($id)
     {
-        if (auth()->user()->role !== 'super_admin') {
+        if (auth()->user()->role !== 'super_admin' && auth()->user()->role !== 'admin') {
             abort(403);
         }
 
