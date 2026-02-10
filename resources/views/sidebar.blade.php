@@ -62,7 +62,7 @@
                    <li class="menu-item">
                     <a class="menu-link" href="{{route('customers.index')}}" role="button">
                       <i class="fi fi-rr-user"></i>
-                      <span class="menu-label">Show Add Data</span>
+                      <span class="menu-label">Show Quotes Data</span>
                     </a>
                   </li>
                   <li class="menu-item">
