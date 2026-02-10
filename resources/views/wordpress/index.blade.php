@@ -6,7 +6,7 @@
 <main class="app-wrapper">
 <div class="container-fluid">
 
-<h4 class="mb-3">Website Customer Data</h4>
+<h4 class="mb-3">Website Data</h4>
 
 @if(session('success'))
 <div class="alert alert-success alert-dismissible fade show">
@@ -27,6 +27,7 @@
   <th>Mobile</th>
   <th>PAN</th>
   <th>Status</th>
+  <th>Created At</th> {{-- 🔥 DATE + TIME --}}
   <th class="text-end">Action</th>
 </tr>
 </thead>
@@ -35,14 +36,26 @@
 @forelse($customers as $customer)
 <tr>
   <td>{{ $loop->iteration }}</td>
+
   <td>{{ $customer->name }}</td>
   <td>{{ $customer->email ?? '—' }}</td>
   <td>{{ $customer->mobile_number ?? '—' }}</td>
   <td>{{ $customer->pan_number ?? '—' }}</td>
+
   <td>
     <span class="badge bg-secondary text-capitalize">
       {{ $customer->status }}
     </span>
+  </td>
+
+  {{-- ✅ DATE + TIME --}}
+  <td>
+    <div class="fw-semibold">
+      {{ $customer->created_at->format('d M Y') }}
+    </div>
+    <small class="text-muted">
+      {{ $customer->created_at->format('h:i A') }}
+    </small>
   </td>
 
   <td class="text-end">
@@ -61,10 +74,11 @@
     </form>
   </td>
 </tr>
+
 @empty
 <tr>
-  <td colspan="7" class="text-center text-muted py-4">
-    No  data found
+  <td colspan="8" class="text-center text-muted py-4">
+    No data found
   </td>
 </tr>
 @endforelse
