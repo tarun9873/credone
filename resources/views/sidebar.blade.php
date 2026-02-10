@@ -62,13 +62,13 @@
                    <li class="menu-item">
                     <a class="menu-link" href="{{route('customers.index')}}" role="button">
                       <i class="fi fi-rr-user"></i>
-                      <span class="menu-label">Show Customers Data</span>
+                      <span class="menu-label">Show Add Data</span>
                     </a>
                   </li>
                   <li class="menu-item">
                     <a class="menu-link" href="{{route('costomers-new')}}" role="button">
                       <i class="fi fi-rr-settings"></i>
-                      <span class="menu-label">New Customers Data</span>
+                      <span class="menu-label">Add Quotes </span>
                     </a>
                   </li>
 
@@ -76,7 +76,7 @@
 <li class="menu-item">
   <a class="menu-link" href="{{ route('wordpress.customers.index') }}" role="button">
     <i class="fi fi-rr-globe-alt"></i>
-    <span class="menu-label">Website  Data</span>
+    <span class="menu-label">Website Quotes Data</span>
   </a>
 </li>
 @endif
