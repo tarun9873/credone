@@ -30,6 +30,7 @@
   <th>Mobile</th>
   <th>PAN</th>
   <th>Status</th>
+  <th>Created At</th> {{-- 🔥 TIME COLUMN --}}
   <th class="text-end">Action</th>
 </tr>
 </thead>
@@ -38,15 +39,28 @@
 @forelse($panelCustomers as $customer)
 <tr>
   <td>{{ $loop->iteration }}</td>
+
   <td>{{ $customer->name }}</td>
   <td>{{ $customer->email ?? '—' }}</td>
   <td>{{ $customer->mobile_number ?? '—' }}</td>
   <td>{{ $customer->pan_number ?? '—' }}</td>
+
   <td>
     <span class="badge bg-secondary text-capitalize">
       {{ $customer->status }}
     </span>
   </td>
+
+  {{-- 🔥 DATE + TIME --}}
+  <td>
+    <div class="fw-semibold">
+      {{ $customer->created_at->format('d M Y') }}
+    </div>
+    <small class="text-muted">
+      {{ $customer->created_at->format('h:i A') }}
+    </small>
+  </td>
+
   <td class="text-end">
     <a href="{{ url('/customers/edit/'.$customer->id) }}"
        class="btn btn-sm btn-warning">
@@ -65,9 +79,10 @@
     </form>
   </td>
 </tr>
+
 @empty
 <tr>
-  <td colspan="7" class="text-center text-muted py-4">
+  <td colspan="8" class="text-center text-muted py-4">
     No panel data found
   </td>
 </tr>
@@ -77,11 +92,6 @@
 
 </div>
 </div>
-
-
-</div>
-</div>
-
 
 </div>
 </main>
