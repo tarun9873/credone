@@ -11,12 +11,17 @@ class CustomLoginController extends Controller
 {
     public function login(Request $request)
     {
+        // ===============================
+        // BASIC VALIDATION
+        // ===============================
         $request->validate([
             'email'    => 'required|email',
             'password' => 'required',
         ]);
 
-        // ❌ wrong credentials
+        // ===============================
+        // LOGIN ATTEMPT
+        // ===============================
         if (!Auth::attempt($request->only('email','password'))) {
             return back()->withErrors([
                 'email' => 'Invalid login details'
@@ -24,37 +29,56 @@ class CustomLoginController extends Controller
         }
 
         $user = Auth::user();
-        $ip   = $request->ip();
 
-        /**
-         * 🔥 FIX: IPv6-mapped IPv4 (::ffff:127.0.0.1)
-         */
+        // ===============================
+        // RAW IP (DEBUG)
+        // ===============================
+        $rawIp = $request->ip();
+
+        // 🔥 DEBUG – COMMENT MAT KARNA
+        dd([
+            'RAW_IP_FROM_REQUEST' => $rawIp,
+            'ROLE'                => $user->role,
+            'IS_IPV6'             => filter_var($rawIp, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6),
+            'IS_IPV4'             => filter_var($rawIp, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4),
+            'WHITELIST_IPS'       => IpWhitelist::pluck('ip_address')->toArray(),
+        ]);
+
+        // ===============================
+        // FIX IPv6-mapped IPv4 (::ffff:127.0.0.1)
+        // ===============================
+        $ip = $rawIp;
         if (str_contains($ip, '::ffff:')) {
             $ip = str_replace('::ffff:', '', $ip);
         }
 
-        /**
-         * 🔥 Allow localhost (development)
-         */
+        // ===============================
+        // LOCALHOST ALLOW (DEV)
+        // ===============================
         if (in_array($ip, ['127.0.0.1', '::1'])) {
             return redirect()->route('dashboard');
         }
 
-        // 👑 SUPER ADMIN → NO IP CHECK
+        // ===============================
+        // SUPER ADMIN → NO IP CHECK
+        // ===============================
         if ($user->role === 'super_admin') {
             return redirect()->route('dashboard');
         }
 
-        // ❌ Block REAL IPv6 only
+        // ===============================
+        // BLOCK REAL IPv6 ONLY
+        // ===============================
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
             Auth::logout();
             return back()->withErrors([
-                
                 'ip' => 'IPv6 network not allowed'
             ]);
         }
 
-        // ✅ IPv4 whitelist check
+        // ===============================
+        // IPV4 WHITELIST CHECK
+        // ===============================
         $allowedIps = IpWhitelist::pluck('ip_address')->toArray();
 
         if (!in_array($ip, $allowedIps)) {
@@ -64,6 +88,9 @@ class CustomLoginController extends Controller
             ]);
         }
 
+        // ===============================
+        // SUCCESS
+        // ===============================
         return redirect()->route('dashboard');
     }
 }
