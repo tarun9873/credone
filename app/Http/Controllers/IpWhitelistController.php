@@ -24,28 +24,27 @@ class IpWhitelistController extends Controller
 
     /**
      * =================================================
-     * STORE IP (IPv4 + IPv6 SUPPORT)
+     * STORE IP + LABEL (IPv4 + IPv6)
      * =================================================
      */
     public function store(Request $request)
     {
         $request->validate([
+            'label' => 'required|string|max:100',
             'ip_address' => [
                 'required',
                 'unique:ip_whitelists,ip_address',
                 function ($attribute, $value, $fail) {
-
-                    // ✅ Validate IPv4 or IPv6
                     if (!filter_var($value, FILTER_VALIDATE_IP)) {
                         $fail('Please enter a valid IPv4 or IPv6 address.');
                     }
-
                 }
-            ]
+            ],
         ]);
 
         IpWhitelist::create([
-            'ip_address' => $request->ip_address
+            'label'      => $request->label,
+            'ip_address' => $request->ip_address,
         ]);
 
         return back()->with('success', 'IP address added successfully');
