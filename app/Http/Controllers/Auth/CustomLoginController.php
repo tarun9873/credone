@@ -26,20 +26,35 @@ class CustomLoginController extends Controller
         $user = Auth::user();
         $ip   = $request->ip();
 
-        // 👑 super admin → no IP check
+        /**
+         * 🔥 FIX: IPv6-mapped IPv4 (::ffff:127.0.0.1)
+         */
+        if (str_contains($ip, '::ffff:')) {
+            $ip = str_replace('::ffff:', '', $ip);
+        }
+
+        /**
+         * 🔥 Allow localhost (development)
+         */
+        if (in_array($ip, ['127.0.0.1', '::1'])) {
+            return redirect()->route('dashboard');
+        }
+
+        // 👑 SUPER ADMIN → NO IP CHECK
         if ($user->role === 'super_admin') {
             return redirect()->route('dashboard');
         }
 
-        // ❌ IPv6 block
+        // ❌ Block REAL IPv6 only
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
             Auth::logout();
             return back()->withErrors([
+                
                 'ip' => 'IPv6 network not allowed'
             ]);
         }
 
-        // ✅ IPv4 whitelist
+        // ✅ IPv4 whitelist check
         $allowedIps = IpWhitelist::pluck('ip_address')->toArray();
 
         if (!in_array($ip, $allowedIps)) {
