@@ -72,11 +72,7 @@
 @endif
 
 
-          @if($errors->has('ip'))
-            <div class="alert alert-danger">
-              {{ $errors->first('ip') }}
-            </div>
-          @endif
+        
 
           <!-- LOGIN FORM -->
           <form method="POST" action="{{ route('login.post') }}">
