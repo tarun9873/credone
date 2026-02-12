@@ -6,7 +6,14 @@
 <main class="app-wrapper">
 <div class="container-fluid">
 
-<h4 class="mb-3">WordPress Customers</h4>
+<h4 class="mb-3">Website Data</h4>
+
+@if(session('success'))
+<div class="alert alert-success alert-dismissible fade show">
+  {{ session('success') }}
+  <button class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+@endif
 
 <div class="card">
 <div class="card-body table-responsive">
@@ -18,115 +25,73 @@
   <th>Name</th>
   <th>Email</th>
   <th>Mobile</th>
+  <th>PAN</th>
   <th>Status</th>
-  <th>Created</th>
+  <th>Created At</th> {{-- 🔥 DATE + TIME --}}
   <th class="text-end">Action</th>
 </tr>
 </thead>
 
 <tbody>
-@foreach($customers as $customer)
+@forelse($customers as $customer)
 <tr>
   <td>{{ $loop->iteration }}</td>
+
   <td>{{ $customer->name }}</td>
   <td>{{ $customer->email ?? '—' }}</td>
-  <td>{{ $customer->mobile_number }}</td>
-  <td>{{ $customer->status }}</td>
-  <td>{{ $customer->created_at->format('d M Y h:i A') }}</td>
+  <td>{{ $customer->mobile_number ?? '—' }}</td>
+  <td>{{ $customer->pan_number ?? '—' }}</td>
+
+  <td>
+    <span class="badge bg-secondary text-capitalize">
+      {{ $customer->status }}
+    </span>
+  </td>
+
+  {{-- ✅ DATE + TIME --}}
+  <td>
+    <div class="fw-semibold">
+      {{ $customer->created_at->format('d M Y') }}
+    </div>
+    <small class="text-muted">
+      {{ $customer->created_at->format('h:i A') }}
+    </small>
+  </td>
 
   <td class="text-end">
-    <button
-      class="btn btn-sm btn-info viewBtn"
-      data-id="{{ $customer->id }}"
-      data-bs-toggle="modal"
-      data-bs-target="#viewModal">
-      View
-    </button>
+    <a href="{{ route('wordpress.customers.edit',$customer->id) }}"
+       class="btn btn-sm btn-warning">
+      Edit
+    </a>
+
+    <form method="POST"
+          action="{{ route('wordpress.customers.delete',$customer->id) }}"
+          class="d-inline"
+          onsubmit="return confirm('Delete this record?')">
+      @csrf
+      @method('DELETE')
+      <button class="btn btn-sm btn-danger">Delete</button>
+    </form>
   </td>
 </tr>
-@endforeach
+
+@empty
+<tr>
+  <td colspan="8" class="text-center text-muted py-4">
+    No data found
+  </td>
+</tr>
+@endforelse
 </tbody>
 </table>
 
 </div>
 </div>
 
-{{ $customers->links('pagination::bootstrap-5') }}
+<div class="mt-3">
+  {{ $customers->links('pagination::bootstrap-5') }}
+</div>
 
 </div>
 </main>
-
-{{-- ================= VIEW MODAL ================= --}}
-<div class="modal fade" id="viewModal" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title">Customer Details</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
-      <div class="modal-body">
-        <table class="table table-bordered">
-          <tr><th width="200">Name</th><td id="v_name"></td></tr>
-          <tr><th>Email</th><td id="v_email"></td></tr>
-          <tr><th>Mobile</th><td id="v_mobile"></td></tr>
-          <tr><th>PAN</th><td id="v_pan"></td></tr>
-          <tr><th>DOB</th><td id="v_dob"></td></tr>
-          <tr><th>Mother</th><td id="v_mother"></td></tr>
-          <tr><th>Address</th><td id="v_address"></td></tr>
-          <tr><th>Company</th><td id="v_company"></td></tr>
-          <tr><th>Designation</th><td id="v_designation"></td></tr>
-          <tr><th>Status</th><td id="v_status"></td></tr>
-          <tr><th>Created</th><td id="v_created"></td></tr>
-        </table>
-      </div>
-
-    </div>
-  </div>
-</div>
 @endsection
-
-@push('scripts')
-<script>
-/*
-|--------------------------------------------------------------------------
-| SAFE JS (theme crash-proof)
-|--------------------------------------------------------------------------
-*/
-document.addEventListener('DOMContentLoaded', function () {
-
-  const modal = document.getElementById('viewModal');
-  if (!modal) return; // 🔥 important
-
-  modal.addEventListener('show.bs.modal', function (event) {
-
-    const button = event.relatedTarget;
-    if (!button) return;
-
-    const id = button.getAttribute('data-id');
-    if (!id) return;
-
-    fetch("{{ route('wordpress.customers.view','') }}/" + id)
-      .then(response => response.json())
-      .then(data => {
-
-        document.getElementById('v_name').innerText = data.name ?? '—';
-        document.getElementById('v_email').innerText = data.email ?? '—';
-        document.getElementById('v_mobile').innerText = data.mobile_number ?? '—';
-        document.getElementById('v_pan').innerText = data.pan_number ?? '—';
-        document.getElementById('v_dob').innerText = data.dob ?? '—';
-        document.getElementById('v_mother').innerText = data.mother_name ?? '—';
-        document.getElementById('v_address').innerText = data.resi_address ?? '—';
-        document.getElementById('v_company').innerText = data.company_name ?? '—';
-        document.getElementById('v_designation').innerText = data.designation ?? '—';
-        document.getElementById('v_status').innerText = data.status ?? '—';
-        document.getElementById('v_created').innerText =
-          new Date(data.created_at).toLocaleString();
-      })
-      .catch(err => console.error(err));
-  });
-
-});
-</script>
-@endpush
