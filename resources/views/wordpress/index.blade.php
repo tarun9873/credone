@@ -58,17 +58,23 @@
 
   <td class="text-end">
 
-    {{-- 🔥 VIEW BUTTON --}}
+    {{-- ✅ VIEW BUTTON --}}
     <button
-      class="btn btn-sm btn-info"
+      type="button"
+      class="btn btn-sm btn-info viewBtn"
+      data-name="{{ $customer->name ?? '' }}"
+      data-email="{{ $customer->email ?? '' }}"
+      data-mobile="{{ $customer->mobile_number ?? '' }}"
+      data-pan="{{ $customer->pan_number ?? '' }}"
+      data-dob="{{ $customer->dob ?? '' }}"
+      data-mother="{{ $customer->mother_name ?? '' }}"
+      data-address="{{ $customer->resi_address ?? '' }}"
+      data-company="{{ $customer->company_name ?? '' }}"
+      data-designation="{{ $customer->designation ?? '' }}"
+      data-status="{{ $customer->status ?? '' }}"
+      data-created="{{ optional($customer->created_at)->format('d M Y, h:i A') }}"
       data-bs-toggle="modal"
       data-bs-target="#viewCustomerModal"
-      data-name="{{ $customer->name }}"
-      data-email="{{ $customer->email }}"
-      data-mobile="{{ $customer->mobile_number }}"
-      data-pan="{{ $customer->pan_number }}"
-      data-status="{{ $customer->status }}"
-      data-created="{{ $customer->created_at->format('d M Y, h:i A') }}"
     >
       View
     </button>
@@ -113,40 +119,27 @@
      VIEW CUSTOMER MODAL
 =========================== --}}
 <div class="modal fade" id="viewCustomerModal" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
 
       <div class="modal-header">
-        <h5 class="modal-title">Customer Details</h5>
+        <h5 class="modal-title">Customer Full Details</h5>
         <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
 
       <div class="modal-body">
         <table class="table table-bordered">
-          <tr>
-            <th width="30%">Name</th>
-            <td id="view-name"></td>
-          </tr>
-          <tr>
-            <th>Email</th>
-            <td id="view-email"></td>
-          </tr>
-          <tr>
-            <th>Mobile</th>
-            <td id="view-mobile"></td>
-          </tr>
-          <tr>
-            <th>PAN</th>
-            <td id="view-pan"></td>
-          </tr>
-          <tr>
-            <th>Status</th>
-            <td id="view-status"></td>
-          </tr>
-          <tr>
-            <th>Created At</th>
-            <td id="view-created"></td>
-          </tr>
+          <tr><th>Name</th><td id="v-name"></td></tr>
+          <tr><th>Email</th><td id="v-email"></td></tr>
+          <tr><th>Mobile</th><td id="v-mobile"></td></tr>
+          <tr><th>PAN</th><td id="v-pan"></td></tr>
+          <tr><th>DOB</th><td id="v-dob"></td></tr>
+          <tr><th>Mother Name</th><td id="v-mother"></td></tr>
+          <tr><th>Address</th><td id="v-address"></td></tr>
+          <tr><th>Company Name</th><td id="v-company"></td></tr>
+          <tr><th>Designation</th><td id="v-designation"></td></tr>
+          <tr><th>Status</th><td id="v-status"></td></tr>
+          <tr><th>Created At</th><td id="v-created"></td></tr>
         </table>
       </div>
 
@@ -168,18 +161,23 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-  const modal = document.getElementById('viewCustomerModal');
+  document.querySelectorAll('.viewBtn').forEach(function (btn) {
 
-  modal.addEventListener('show.bs.modal', function (event) {
+    btn.addEventListener('click', function () {
 
-    const btn = event.relatedTarget;
+      document.getElementById('v-name').textContent        = this.dataset.name || '—';
+      document.getElementById('v-email').textContent       = this.dataset.email || '—';
+      document.getElementById('v-mobile').textContent      = this.dataset.mobile || '—';
+      document.getElementById('v-pan').textContent         = this.dataset.pan || '—';
+      document.getElementById('v-dob').textContent         = this.dataset.dob || '—';
+      document.getElementById('v-mother').textContent      = this.dataset.mother || '—';
+      document.getElementById('v-address').textContent     = this.dataset.address || '—';
+      document.getElementById('v-company').textContent     = this.dataset.company || '—';
+      document.getElementById('v-designation').textContent = this.dataset.designation || '—';
+      document.getElementById('v-status').textContent      = this.dataset.status || '—';
+      document.getElementById('v-created').textContent     = this.dataset.created || '—';
 
-    document.getElementById('view-name').innerText    = btn.getAttribute('data-name');
-    document.getElementById('view-email').innerText   = btn.getAttribute('data-email') || '—';
-    document.getElementById('view-mobile').innerText  = btn.getAttribute('data-mobile') || '—';
-    document.getElementById('view-pan').innerText     = btn.getAttribute('data-pan') || '—';
-    document.getElementById('view-status').innerText  = btn.getAttribute('data-status');
-    document.getElementById('view-created').innerText = btn.getAttribute('data-created');
+    });
 
   });
 
