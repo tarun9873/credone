@@ -225,5 +225,16 @@ public function destroy($id)
 
     return back()->with('success','Deleted');
 }
+public function wordpressView($id)
+{
+    abort_unless(
+        in_array(auth()->user()->role, ['admin','super_admin']),
+        403
+    );
+
+    $customer = CustomerCreditCard::whereNull('user_id')->findOrFail($id);
+
+    return response()->json($customer);
+}
 
 }

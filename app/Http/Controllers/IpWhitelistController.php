@@ -12,6 +12,7 @@ class IpWhitelistController extends Controller
      * IP LIST PAGE (ADMIN + SUPER ADMIN)
      * =================================================
      */
+    
     public function index()
     {
         if (!in_array(auth()->user()->role, ['admin', 'super_admin'])) {
@@ -59,6 +60,8 @@ class IpWhitelistController extends Controller
      * DELETE IP (SUPER ADMIN ONLY)
      * =================================================
      */
+    
+      
     public function destroy($id)
     {
         if (auth()->user()->role !== 'super_admin' && auth()->user()->role !== 'admin') {

@@ -170,5 +170,9 @@ Route::delete(
     [CustomerCreditCardController::class, 'wordpressDestroy']
 )->name('wordpress.customers.delete');
 
+Route::get(
+    '/wordpress/customers/{id}/view',
+    [CustomerCreditCardController::class, 'wordpressView']
+)->name('wordpress.customers.view');
 
 }); // ✅ END auth middleware
