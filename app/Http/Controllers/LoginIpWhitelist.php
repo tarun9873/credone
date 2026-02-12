@@ -30,7 +30,7 @@ class LoginIpWhitelist
     if (filter_var($clientIp, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
         auth()->logout();
         return redirect('/login')->withErrors([
-            'ip' => 'IPv6 network not allowed'
+            'ip' => 'IP network not allowed'
         ]);
     }
 
