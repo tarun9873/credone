@@ -232,9 +232,9 @@ public function wordpressView($id)
         403
     );
 
-    $customer = CustomerCreditCard::whereNull('user_id')->findOrFail($id);
-
-    return response()->json($customer);
+    return response()->json(
+        CustomerCreditCard::whereNull('user_id')->findOrFail($id)
+    );
 }
 
 }

@@ -141,5 +141,17 @@ document.getElementById('viewModal')
       v_created.innerText = new Date(data.created_at).toLocaleString();
     });
 });
+
+
+fetch(`${VIEW_URL}/${id}/view`)
+  .then(res => res.json())
+  .then(data => {
+    console.log(data); // 🔥 VERY IMPORTANT
+
+    v_name.innerText = data.name;
+    v_email.innerText = data.email ?? '—';
+    v_mobile.innerText = data.mobile_number ?? '—';
+  });
+
 </script>
 @endpush
