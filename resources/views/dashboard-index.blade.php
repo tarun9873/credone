@@ -215,7 +215,7 @@
 
 <div class="row mb-3">
   <div class="col-md-6">
-    <label class="form-label">Full Name</label>
+    <label class="form-label text-dark">Full Name</label>
     <input type="text"
            class="form-control"
            name="name"
@@ -224,7 +224,7 @@
   </div>
 
   <div class="col-md-6">
-    <label class="form-label">Email</label>
+    <label class="form-label text-dark">Email</label>
     <input type="email"
            class="form-control"
            name="email"
@@ -235,7 +235,7 @@
 
 <div class="row mb-3">
   <div class="col-md-6">
-    <label class="form-label">Role</label>
+    <label class="form-label text-dark">Role</label>
     <input type="text"
            class="form-control"
            value="{{ strtoupper(str_replace('_',' ', auth()->user()->role)) }}"
@@ -244,7 +244,7 @@
   </div>
 
   <div class="col-md-6">
-    <label class="form-label">New Password</label>
+    <label class="form-label text-dark">New Password</label>
     <input type="password"
            class="form-control"
            name="password"

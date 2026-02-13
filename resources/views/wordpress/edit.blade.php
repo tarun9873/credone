@@ -14,7 +14,6 @@
 @method('PUT')
 
 <div class="row g-3">
-
   {{-- NAME --}}
   <div class="col-md-6">
     <label class="form-label">Name</label>
@@ -23,7 +22,6 @@
            name="name"
            value="{{ $customer->name }}">
   </div>
-
   {{-- EMAIL --}}
   <div class="col-md-6">
     <label class="form-label">Email</label>
@@ -32,7 +30,6 @@
            name="email"
            value="{{ $customer->email }}">
   </div>
-
   {{-- MOBILE --}}
   <div class="col-md-6">
     <label class="form-label">Mobile Number</label>
