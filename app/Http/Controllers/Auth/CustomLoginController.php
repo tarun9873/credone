@@ -68,7 +68,7 @@ class CustomLoginController extends Controller
             if (!in_array($ip, $allowedIps)) {
                 Auth::logout();
                 return back()->withErrors([
-                    'ip' => 'Your IPv6 address is not authorized'
+                    'ip' => 'Your address is not authorized'
                 ]);
             }
 
