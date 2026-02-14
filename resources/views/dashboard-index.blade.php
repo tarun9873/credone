@@ -266,6 +266,17 @@
 
 </form>
 
+@if(session()->has('impersonator_id'))
+  <div class="alert alert-warning text-center">
+    You are logged in as Employee.
+    <a href="{{ route('employees.return') }}"
+       class="btn btn-sm btn-danger ms-2">
+       Return to Admin
+    </a>
+  </div>
+@endif
+
+
                   </div>
                 </div>
               </div>

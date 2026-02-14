@@ -55,6 +55,17 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 
 
+Route::get(
+    '/employees/login/{id}',
+    [EmployeeController::class, 'loginAsEmployee']
+)->name('employees.login');
+
+Route::get(
+    '/return-to-admin',
+    [EmployeeController::class, 'returnToAdmin']
+)->name('employees.return');
+
+
     /*
     |-------------------------
     | PROFILE

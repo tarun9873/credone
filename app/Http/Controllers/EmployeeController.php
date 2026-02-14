@@ -3,13 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Http\Request; // ✅ 🔥 THIS WAS MISSING
+use Illuminate\Http\Request; 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+
+
 
 class EmployeeController extends Controller
 {
+    
     /**
      * LIST → admin & super_admin
      */
+    
     public function index(Request $request)
     {
         if (!in_array(auth()->user()->role, ['admin','super_admin'])) {
@@ -27,10 +33,13 @@ class EmployeeController extends Controller
 
         return view('employees.index', compact('employees'));
     }
+    
 
     /**
      * VIEW → admin & super_admin
      */
+
+    
     public function show($id)
     {
         if (!in_array(auth()->user()->role, ['admin','super_admin'])) {
@@ -42,14 +51,18 @@ class EmployeeController extends Controller
         return view('employees.show', compact('employee'));
     }
 
+    
     /**
      * DELETE → admin only
      */
+
+    
     public function destroy($id)
     {
-        if (auth()->user()->role !== 'admin') {
-            abort(403);
-        }
+       if (!in_array(auth()->user()->role, ['admin','super_admin'])) {
+    abort(403);
+}
+
 
         User::where('role','employee')->findOrFail($id)->delete();
 
@@ -57,4 +70,47 @@ class EmployeeController extends Controller
             ->route('employees.index')
             ->with('success','Employee deleted');
     }
+
+    /**
+ * LOGIN AS EMPLOYEE (ADMIN / SUPER ADMIN)
+ */
+public function loginAsEmployee($id)
+{
+    // if (!in_array(auth()->user()->role, ['admin','super_admin'])) {
+    //     abort(403);
+    // }
+
+    if (auth()->user()->role !== 'super_admin') {
+    abort(403);
+}
+
+
+    $employee = User::where('role','employee')->findOrFail($id);
+
+    // 🧠 Store original admin ID
+    Session::put('impersonator_id', auth()->id());
+
+    // 🔄 Login as employee
+    Auth::login($employee);
+
+    return redirect()->route('dashboard')
+        ->with('success', 'Logged in as '.$employee->name);
+}
+
+public function returnToAdmin()
+{
+    if (!Session::has('impersonator_id')) {
+        abort(403);
+    }
+
+    $adminId = Session::get('impersonator_id');
+
+    Session::forget('impersonator_id');
+
+    Auth::loginUsingId($adminId);
+
+    return redirect()->route('dashboard')
+        ->with('success', 'Returned to Admin account');
+}
+
 }

@@ -87,23 +87,37 @@
       </td>
 
       {{-- ACTION --}}
-      <td class="text-end">
-        {{-- DELETE (ADMIN ONLY) --}}
-        @if(auth()->user()->role === 'admin')
-          <form method="POST"
-                action="{{ route('employees.destroy',$employee->id) }}"
-                class="d-inline"
-                onsubmit="return confirm('Delete this employee?')">
-            @csrf
-            @method('DELETE')
-            <button class="btn btn-sm btn-danger">
-              Delete
-            </button>
-          </form>
-        @else
-          <span class="text-muted">—</span>
-        @endif
-      </td>
+
+
+     <td class="text-end">
+
+  {{-- @if(in_array(auth()->user()->role, ['admin','super_admin'])) --}}
+  @if(auth()->user()->role === 'super_admin')
+
+    {{-- LOGIN BUTTON --}}
+    <a href="{{ route('employees.login',$employee->id) }}"
+       class="btn btn-sm btn-primary">
+       Login
+    </a>
+
+  @endif
+
+@if(in_array(auth()->user()->role, ['admin','super_admin']))
+  <form method="POST"
+        action="{{ route('employees.destroy',$employee->id) }}"
+        class="d-inline"
+        onsubmit="return confirm('Delete this employee?')">
+    @csrf
+    @method('DELETE')
+    <button class="btn btn-sm btn-danger">
+      Delete
+    </button>
+  </form>
+@endif
+
+
+</td>
+
 
     </tr>
   @empty

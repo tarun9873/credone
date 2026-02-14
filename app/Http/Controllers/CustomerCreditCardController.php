@@ -7,11 +7,13 @@ use App\Models\CustomerCreditCard;
 
 class CustomerCreditCardController extends Controller
 {
+    
     /**
      * =================================================
      * PANEL DATA STORE (ALL ROLES)
      * =================================================
      */
+    
     public function store(Request $request)
     {
         $request->validate([
@@ -35,7 +37,7 @@ class CustomerCreditCardController extends Controller
 
         return back()->with('success', 'Data saved successfully');
     }
-
+   
     /**
      * =================================================
      * WORDPRESS DATA STORE (NO USER)
@@ -48,7 +50,7 @@ class CustomerCreditCardController extends Controller
         }
 
         CustomerCreditCard::create([
-            'user_id'       => null, // 🌐 WordPress
+            'user_id'       => null,
             'name'          => $request->name,
             'dob'           => $request->dob,
             'pan_number'    => $request->pan,
@@ -144,6 +146,7 @@ public function wordpressDestroy($id)
      * LIST → 🔒 ONLY OWN DATA (ALL ROLES)
      * =================================================
      */
+    
   public function index(Request $request)
 {
     // 🔍 SEARCH
@@ -154,6 +157,7 @@ public function wordpressDestroy($id)
     | PANEL DATA (Logged-in user ka apna data)
     |--------------------------------------------------------------------------
     */
+    
     $panelCustomers = CustomerCreditCard::whereNotNull('user_id')
         ->where('user_id', auth()->id())
         ->when($search, function ($q) use ($search) {
@@ -171,6 +175,7 @@ public function wordpressDestroy($id)
     | WORDPRESS DATA (sirf admin / super_admin dekh sakta)
     |--------------------------------------------------------------------------
     */
+    
     $wpCustomers = collect(); // empty by default
 
     if (in_array(auth()->user()->role, ['admin', 'super_admin'])) {
@@ -181,6 +186,7 @@ public function wordpressDestroy($id)
 
     return view('all-clientdata', compact('panelCustomers', 'wpCustomers'));
 }
+
 
     public function edit($id)
 {
@@ -193,6 +199,7 @@ public function wordpressDestroy($id)
 
     return view('customer.edit', compact('customer'));
 }
+
 
 public function update(Request $request, $id)
 {
@@ -213,6 +220,7 @@ public function update(Request $request, $id)
         ->with('success','Customer updated');
 }
 
+
 public function destroy($id)
 {
     $customer = CustomerCreditCard::findOrFail($id);
@@ -225,6 +233,8 @@ public function destroy($id)
 
     return back()->with('success','Deleted');
 }
+
+
 public function wordpressView($id)
 {
     abort_unless(
@@ -236,5 +246,6 @@ public function wordpressView($id)
         CustomerCreditCard::whereNull('user_id')->findOrFail($id)
     );
 }
+
 
 }
