@@ -8,14 +8,16 @@
 <title>@yield('title','Dashboard')</title>
 
 <link rel="icon" href="{{ asset('assets/images/favicon.png') }}">
-<link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css">
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<link rel="stylesheet" href="{{ asset('assets/libs/flaticon/css/all/all.css') }}">
+
+
 
 <link rel="stylesheet" href="{{ asset('assets/libs/simplebar/simplebar.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/libs/node-waves/waves.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/libs/bootstrap-select/css/bootstrap-select.min.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/libs/flatpickr/flatpickr.min.css') }}">
+
 <link rel="stylesheet" href="{{ asset('assets/libs/datatables/datatables.min.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/styles.css') }}">
 
