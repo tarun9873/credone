@@ -186,4 +186,17 @@ Route::get(
     [CustomerCreditCardController::class, 'wordpressView']
 )->name('wordpress.customers.view');
 
+
+
+Route::post('/customers/{id}/upload-documents', 
+    [CustomerCreditCardController::class, 'uploadDocuments']
+)->name('customers.upload.documents');
+Route::get('/customers/{id}/view',
+    [CustomerCreditCardController::class, 'view']
+)->name('customers.view');
+Route::delete('/documents/{id}',
+    [CustomerCreditCardController::class,'deleteDocument']
+)->name('documents.delete');
+
+
 }); // ✅ END auth middleware

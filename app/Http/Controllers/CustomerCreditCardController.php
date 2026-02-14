@@ -2,27 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\CustomerCreditCard;
+use App\Models\CustomerDocument;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class CustomerCreditCardController extends Controller
 {
-    
-    /**
-     * =================================================
-     * PANEL DATA STORE (ALL ROLES)
-     * =================================================
-     */
-    
+
+    /* ================= STORE (PANEL) ================= */
     public function store(Request $request)
     {
         $request->validate([
-            'name'          => 'required|string',
+            'name' => 'required|string',
             'mobile_number' => 'required|string',
+            'documents.*' => 'nullable|file|max:5120'
         ]);
 
-        CustomerCreditCard::create([
-            'user_id'       => auth()->id(),   // 🔐 owner
+        $customer = CustomerCreditCard::create([
+            'user_id'       => auth()->id(),
             'name'          => $request->name,
             'dob'           => $request->dob,
             'pan_number'    => $request->pan_number,
@@ -35,217 +33,268 @@ class CustomerCreditCardController extends Controller
             'status'        => 'pending',
         ]);
 
-        return back()->with('success', 'Data saved successfully');
+        $this->handleDocumentUpload($request, $customer);
+
+        return back()->with('success', 'Customer saved successfully');
     }
-   
-    /**
-     * =================================================
-     * WORDPRESS DATA STORE (NO USER)
-     * =================================================
-     */
-    public function storeFromWordpress(Request $request)
+
+
+    /* ================= VIEW (AJAX) ================= */
+    public function view($id)
     {
-        if ($request->header('X-APP-KEY') !== 'MY_SECRET_KEY_123') {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        $customer = CustomerCreditCard::with('documents')->findOrFail($id);
+        return response()->json($customer);
+    }
+
+
+    /* ================= EDIT (PANEL) ================= */
+    public function edit($id)
+    {
+        $customer = CustomerCreditCard::with('documents')->findOrFail($id);
+
+        if ($customer->user_id !== auth()->id()) {
+            abort(403);
         }
 
-        CustomerCreditCard::create([
-            'user_id'       => null,
-            'name'          => $request->name,
-            'dob'           => $request->dob,
-            'pan_number'    => $request->pan,
-            'mother_name'   => $request->mother_name,
-            'mobile_number' => $request->mobile,
-            'email'         => $request->email,
-            'company_name'  => $request->company,
-            'designation'   => $request->designation,
-            'resi_address'  => $request->address,
-            'status'        => 'pending',
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Saved from WordPress',
-        ]);
+        return view('customer.edit', compact('customer'));
     }
 
-    /*
-|--------------------------------------------------------------------------
-| WORDPRESS DATA – ADMIN / SUPER ADMIN ONLY
-|--------------------------------------------------------------------------
-*/
 
-public function wordpressIndex()
-{
-    abort_unless(
-        in_array(auth()->user()->role, ['admin','super_admin']),
-        403
-    );
+    /* ================= UPDATE (PANEL) ================= */
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string',
+            'mobile_number' => 'required|string',
+            'documents.*' => 'nullable|file|max:5120'
+        ]);
 
-    $customers = CustomerCreditCard::whereNull('user_id')
-        ->latest()
-        ->paginate(10);
+        $customer = CustomerCreditCard::findOrFail($id);
 
-    return view('wordpress.index', compact('customers'));
-}
+        if ($customer->user_id !== auth()->id()) {
+            abort(403);
+        }
 
-public function wordpressEdit($id)
-{
-    abort_unless(
-        in_array(auth()->user()->role, ['admin','super_admin']),
-        403
-    );
+        $customer->update($request->only([
+            'name',
+            'email',
+            'mobile_number',
+            'pan_number',
+            'dob',
+            'mother_name',
+            'resi_address',
+            'company_name',
+            'designation',
+            'status'
+        ]));
 
-    $customer = CustomerCreditCard::whereNull('user_id')->findOrFail($id);
+        $this->handleDocumentUpload($request, $customer);
 
-    return view('wordpress.edit', compact('customer'));
-}
-
-public function wordpressUpdate(Request $request, $id)
-{
-    abort_unless(
-        in_array(auth()->user()->role, ['admin','super_admin']),
-        403
-    );
-
-    $customer = CustomerCreditCard::whereNull('user_id')->findOrFail($id);
-
-    $customer->update($request->only([
-        'name',
-        'email',
-        'mobile_number',
-        'pan_number',
-        'dob',
-        'mother_name',
-        'resi_address',
-        'company_name',
-        'designation',
-        'status',
-    ]));
-
-    return redirect()
-        ->route('wordpress.customers.index')
-        ->with('success', 'WordPress customer updated');
-}
-
-public function wordpressDestroy($id)
-{
-    abort_unless(
-        in_array(auth()->user()->role, ['admin','super_admin']),
-        403
-    );
-
-    CustomerCreditCard::whereNull('user_id')->findOrFail($id)->delete();
-
-    return back()->with('success', 'WordPress customer deleted');
-}
+        return redirect()
+            ->route('customers.index')
+            ->with('success', 'Customer updated successfully');
+    }
 
 
-    /**
-     * =================================================
-     * LIST → 🔒 ONLY OWN DATA (ALL ROLES)
-     * =================================================
-     */
-    
-  public function index(Request $request)
-{
-    // 🔍 SEARCH
-    $search = $request->search;
+    /* ================= DELETE (PANEL) ================= */
+    public function destroy($id)
+    {
+        $customer = CustomerCreditCard::with('documents')->findOrFail($id);
 
-    /*
-    |--------------------------------------------------------------------------
-    | PANEL DATA (Logged-in user ka apna data)
-    |--------------------------------------------------------------------------
-    */
-    
-    $panelCustomers = CustomerCreditCard::whereNotNull('user_id')
-        ->where('user_id', auth()->id())
-        ->when($search, function ($q) use ($search) {
-            $q->where('name', 'like', "%$search%")
-              ->orWhere('email', 'like', "%$search%")
-              ->orWhere('mobile_number', 'like', "%$search%")
-              ->orWhere('pan_number', 'like', "%$search%");
-        })
-        ->latest()
-        ->paginate(10)
-        ->withQueryString();
+        if ($customer->user_id !== auth()->id()) {
+            abort(403);
+        }
 
-    /*
-    |--------------------------------------------------------------------------
-    | WORDPRESS DATA (sirf admin / super_admin dekh sakta)
-    |--------------------------------------------------------------------------
-    */
-    
-    $wpCustomers = collect(); // empty by default
+        foreach ($customer->documents as $doc) {
+            Storage::disk('public')->delete($doc->file_path);
+        }
 
-    if (in_array(auth()->user()->role, ['admin', 'super_admin'])) {
-        $wpCustomers = CustomerCreditCard::whereNull('user_id')
+        $customer->delete();
+
+        return back()->with('success', 'Deleted');
+    }
+
+
+    /* ================= DELETE DOCUMENT ================= */
+    public function deleteDocument($id)
+    {
+        $doc = CustomerDocument::findOrFail($id);
+
+        Storage::disk('public')->delete($doc->file_path);
+        $doc->delete();
+
+        return back()->with('success','Document deleted');
+    }
+
+
+    /* ================= INDEX ================= */
+    public function index(Request $request)
+    {
+        $search = $request->search;
+
+        $panelCustomers = CustomerCreditCard::whereNotNull('user_id')
+            ->where('user_id', auth()->id())
+            ->when($search, function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('email', 'like', "%$search%")
+                  ->orWhere('mobile_number', 'like', "%$search%")
+                  ->orWhere('pan_number', 'like', "%$search%");
+            })
             ->latest()
-            ->get();
+            ->paginate(10)
+            ->withQueryString();
+
+        $wpCustomers = collect();
+
+        if (in_array(auth()->user()->role, ['admin','super_admin'])) {
+            $wpCustomers = CustomerCreditCard::whereNull('user_id')
+                ->latest()
+                ->get();
+        }
+
+        return view('all-clientdata', compact('panelCustomers','wpCustomers'));
     }
 
-    return view('all-clientdata', compact('panelCustomers', 'wpCustomers'));
-}
 
 
-    public function edit($id)
+    /* ================= WORDPRESS API STORE ================= */
+public function storeFromWordpress(Request $request)
 {
-    $customer = CustomerCreditCard::findOrFail($id);
-
-    // sirf apna data
-    if ($customer->user_id !== auth()->id()) {
-        abort(403);
+    if ($request->header('X-APP-KEY') !== 'MY_SECRET_KEY_123') {
+        return response()->json(['error' => 'Unauthorized'], 401);
     }
 
-    return view('customer.edit', compact('customer'));
+    CustomerCreditCard::create([
+        'user_id'       => null, // WordPress data
+        'name'          => $request->name,
+        'dob'           => $request->dob,
+        'pan_number'    => $request->pan,
+        'mother_name'   => $request->mother_name,
+        'mobile_number' => $request->mobile,
+        'email'         => $request->email,
+        'company_name'  => $request->company,
+        'designation'   => $request->designation,
+        'resi_address'  => $request->address,
+        'status'        => 'pending',
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Saved from WordPress'
+    ]);
 }
 
+    /* ================= WORDPRESS INDEX ================= */
+    public function wordpressIndex()
+    {
+        abort_unless(
+            in_array(auth()->user()->role, ['admin','super_admin']),
+            403
+        );
 
-public function update(Request $request, $id)
-{
-    $customer = CustomerCreditCard::findOrFail($id);
+        $customers = CustomerCreditCard::whereNull('user_id')
+            ->latest()
+            ->paginate(10);
 
-    if ($customer->user_id !== auth()->id()) {
-        abort(403);
+        return view('wordpress.index', compact('customers'));
     }
 
-    $customer->update($request->only([
-        'name','email','mobile_number','pan_number',
-        'dob','mother_name','resi_address',
-        'company_name','designation'
-    ]));
 
-    return redirect()
-        ->route('customers.index')
-        ->with('success','Customer updated');
-}
+    /* ================= WORDPRESS EDIT ================= */
+    public function wordpressEdit($id)
+    {
+        abort_unless(
+            in_array(auth()->user()->role, ['admin','super_admin']),
+            403
+        );
 
+        $customer = CustomerCreditCard::whereNull('user_id')
+            ->with('documents')
+            ->findOrFail($id);
 
-public function destroy($id)
-{
-    $customer = CustomerCreditCard::findOrFail($id);
-
-    if ($customer->user_id !== auth()->id()) {
-        abort(403);
+        return view('wordpress.edit', compact('customer'));
     }
 
-    $customer->delete();
 
-    return back()->with('success','Deleted');
-}
+    /* ================= WORDPRESS UPDATE ================= */
+    public function wordpressUpdate(Request $request, $id)
+    {
+        abort_unless(
+            in_array(auth()->user()->role, ['admin','super_admin']),
+            403
+        );
+
+        $customer = CustomerCreditCard::whereNull('user_id')
+            ->findOrFail($id);
+
+        $customer->update($request->only([
+            'name',
+            'email',
+            'mobile_number',
+            'pan_number',
+            'dob',
+            'mother_name',
+            'resi_address',
+            'company_name',
+            'designation',
+            'status'
+        ]));
+
+        return redirect()
+            ->route('wordpress.customers.index')
+            ->with('success', 'WordPress customer updated');
+    }
 
 
-public function wordpressView($id)
-{
-    abort_unless(
-        in_array(auth()->user()->role, ['admin','super_admin']),
-        403
-    );
+    /* ================= WORDPRESS DELETE ================= */
+    public function wordpressDestroy($id)
+    {
+        abort_unless(
+            in_array(auth()->user()->role, ['admin','super_admin']),
+            403
+        );
 
-    return response()->json(
-        CustomerCreditCard::whereNull('user_id')->findOrFail($id)
-    );
-}
+        CustomerCreditCard::whereNull('user_id')
+            ->findOrFail($id)
+            ->delete();
+
+        return back()->with('success', 'WordPress customer deleted');
+    }
 
 
+    /* ================= WORDPRESS VIEW ================= */
+    public function wordpressView($id)
+    {
+        abort_unless(
+            in_array(auth()->user()->role, ['admin','super_admin']),
+            403
+        );
+
+        return response()->json(
+            CustomerCreditCard::whereNull('user_id')
+                ->with('documents')
+                ->findOrFail($id)
+        );
+    }
+
+
+    /* ================= DOCUMENT HANDLER ================= */
+    private function handleDocumentUpload(Request $request, $customer)
+    {
+        if (!$request->hasFile('documents')) {
+            return;
+        }
+
+        foreach ($request->file('documents') as $file) {
+
+            if (!$file->isValid()) continue;
+
+            $path = $file->store('customer-documents', 'public');
+
+            CustomerDocument::create([
+                'customer_id' => $customer->id,
+                'file_path'   => $path
+            ]);
+        }
+    }
 }

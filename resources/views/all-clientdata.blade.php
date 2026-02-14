@@ -6,7 +6,6 @@
 <main class="app-wrapper">
 <div class="container-fluid">
 
-{{-- ================= PANEL DATA ================= --}}
 <div class="app-page-head mb-3">
   <h4 class="mb-0">My Customer Data</h4>
 </div>
@@ -61,24 +60,12 @@
 
   <td class="text-end">
 
-    {{-- ✅ VIEW BUTTON (ADDED) --}}
-    <button
-      type="button"
-      class="btn btn-sm btn-info viewBtn"
-      data-name="{{ $customer->name ?? '' }}"
-      data-email="{{ $customer->email ?? '' }}"
-      data-mobile="{{ $customer->mobile_number ?? '' }}"
-      data-pan="{{ $customer->pan_number ?? '' }}"
-      data-dob="{{ $customer->dob ?? '' }}"
-      data-mother="{{ $customer->mother_name ?? '' }}"
-      data-address="{{ $customer->resi_address ?? '' }}"
-      data-company="{{ $customer->company_name ?? '' }}"
-      data-designation="{{ $customer->designation ?? '' }}"
-      data-status="{{ $customer->status ?? '' }}"
-      data-created="{{ optional($customer->created_at)->format('d M Y, h:i A') }}"
-      data-bs-toggle="modal"
-      data-bs-target="#viewCustomerModal"
-    >
+    {{-- VIEW BUTTON --}}
+    <button type="button"
+            class="btn btn-sm btn-info viewBtn"
+            data-id="{{ $customer->id }}"
+            data-bs-toggle="modal"
+            data-bs-target="#viewCustomerModal">
       View
     </button>
 
@@ -97,6 +84,7 @@
         Delete
       </button>
     </form>
+
   </td>
 </tr>
 
@@ -116,9 +104,7 @@
 </div>
 </main>
 
-{{-- ===========================
-     VIEW CUSTOMER MODAL
-=========================== --}}
+{{-- ================= VIEW MODAL ================= --}}
 <div class="modal fade" id="viewCustomerModal" tabindex="-1">
   <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
@@ -129,19 +115,14 @@
       </div>
 
       <div class="modal-body">
-        <table class="table table-bordered">
-          <tr><th>Name</th><td id="v-name"></td></tr>
-          <tr><th>Email</th><td id="v-email"></td></tr>
-          <tr><th>Mobile</th><td id="v-mobile"></td></tr>
-          <tr><th>PAN</th><td id="v-pan"></td></tr>
-          <tr><th>DOB</th><td id="v-dob"></td></tr>
-          <tr><th>Mother Name</th><td id="v-mother"></td></tr>
-          <tr><th>Address</th><td id="v-address"></td></tr>
-          <tr><th>Company</th><td id="v-company"></td></tr>
-          <tr><th>Designation</th><td id="v-designation"></td></tr>
-          <tr><th>Status</th><td id="v-status"></td></tr>
-          <tr><th>Created At</th><td id="v-created"></td></tr>
-        </table>
+
+        <div id="customerDetails"></div>
+
+        <hr>
+
+        <h6>Uploaded Documents</h6>
+        <div id="customerDocuments" class="row"></div>
+
       </div>
 
       <div class="modal-footer">
@@ -155,9 +136,7 @@
 </div>
 @endsection
 
-{{-- ===========================
-     MODAL DATA SCRIPT
-=========================== --}}
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -166,17 +145,98 @@ document.addEventListener('DOMContentLoaded', function () {
 
     btn.addEventListener('click', function () {
 
-      document.getElementById('v-name').textContent        = this.dataset.name || '—';
-      document.getElementById('v-email').textContent       = this.dataset.email || '—';
-      document.getElementById('v-mobile').textContent      = this.dataset.mobile || '—';
-      document.getElementById('v-pan').textContent         = this.dataset.pan || '—';
-      document.getElementById('v-dob').textContent         = this.dataset.dob || '—';
-      document.getElementById('v-mother').textContent      = this.dataset.mother || '—';
-      document.getElementById('v-address').textContent     = this.dataset.address || '—';
-      document.getElementById('v-company').textContent     = this.dataset.company || '—';
-      document.getElementById('v-designation').textContent = this.dataset.designation || '—';
-      document.getElementById('v-status').textContent      = this.dataset.status || '—';
-      document.getElementById('v-created').textContent     = this.dataset.created || '—';
+      const customerId = this.dataset.id;
+
+      // 🔥 SHOW LOADING MESSAGE
+      document.getElementById('customerDetails').innerHTML =
+        '<div class="text-center p-4">Loading customer data...</div>';
+
+      document.getElementById('customerDocuments').innerHTML = '';
+
+      fetch(`/customers/${customerId}/view`)
+        .then(res => res.json())
+        .then(data => {
+
+          // ===== CUSTOMER DETAILS =====
+          document.getElementById('customerDetails').innerHTML = `
+            <table class="table table-bordered">
+              <tr><th>Name</th><td>${data.name ?? '—'}</td></tr>
+              <tr><th>Email</th><td>${data.email ?? '—'}</td></tr>
+              <tr><th>Mobile</th><td>${data.mobile_number ?? '—'}</td></tr>
+              <tr><th>PAN</th><td>${data.pan_number ?? '—'}</td></tr>
+              <tr><th>DOB</th><td>${data.dob ?? '—'}</td></tr>
+              <tr><th>Mother Name</th><td>${data.mother_name ?? '—'}</td></tr>
+              <tr><th>Address</th><td>${data.resi_address ?? '—'}</td></tr>
+              <tr><th>Company</th><td>${data.company_name ?? '—'}</td></tr>
+              <tr><th>Designation</th><td>${data.designation ?? '—'}</td></tr>
+              <tr><th>Status</th><td>${data.status ?? '—'}</td></tr>
+              <tr><th>Created At</th><td>${data.created_at ?? '—'}</td></tr>
+            </table>
+          `;
+
+          // ===== DOCUMENTS SECTION =====
+          let docsHtml = '';
+
+          if (data.documents && data.documents.length > 0) {
+
+            data.documents.forEach(doc => {
+
+              const fileUrl = `/storage/${doc.file_path}`;
+              const extension = doc.file_path.split('.').pop().toLowerCase();
+
+              // 🔥 IMAGE PREVIEW
+              if (['jpg','jpeg','png','gif','webp'].includes(extension)) {
+
+                docsHtml += `
+                  <div class="col-md-3 mb-3">
+                    <div class="card">
+                      <img src="${fileUrl}" 
+                           class="card-img-top"
+                           style="height:150px;object-fit:cover;">
+                      <div class="card-body text-center p-2">
+                        <a href="${fileUrl}" target="_blank"
+                           class="btn btn-sm btn-primary w-100">
+                           Open
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                `;
+
+              } else {
+
+                // 🔥 NON IMAGE FILE
+                docsHtml += `
+                  <div class="col-md-3 mb-3">
+                    <div class="card p-3 text-center">
+                      <i class="fi fi-rr-file fs-3"></i>
+                      <p class="small mt-2">${extension.toUpperCase()} File</p>
+                      <a href="${fileUrl}" target="_blank"
+                         class="btn btn-sm btn-outline-primary">
+                         Open File
+                      </a>
+                    </div>
+                  </div>
+                `;
+              }
+
+            });
+
+          } else {
+            docsHtml = `
+              <div class="text-center text-muted p-3">
+                No documents uploaded
+              </div>
+            `;
+          }
+
+          document.getElementById('customerDocuments').innerHTML = docsHtml;
+
+        })
+        .catch(() => {
+          document.getElementById('customerDetails').innerHTML =
+            '<div class="text-danger text-center p-3">Failed to load data</div>';
+        });
 
     });
 

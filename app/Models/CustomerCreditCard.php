@@ -24,4 +24,10 @@ class CustomerCreditCard extends Model
     {
         return $this->belongsTo(\App\Models\User::class);
     }
+
+    public function documents()
+{
+    return $this->hasMany(CustomerDocument::class, 'customer_id');
+}
+
 }
